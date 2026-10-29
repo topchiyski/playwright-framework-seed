@@ -1,14 +1,13 @@
-import { mergeTests } from '@playwright/test';
 import { env } from '@config/env';
 import { TAG } from '@utils/tags';
-import { test as apiTest } from './api.fixtures';
-import { test as pageTest } from './page.fixtures';
+import { test as appTest } from './app.fixtures';
 
 /**
- * The ONLY `test` specs should import. Combines page, auth and API fixtures and adds
- * framework-wide guards. Import `expect` from here too, never from `@playwright/test`.
+ * The ONLY `test` specs should import. Layers: framework fixtures (`base.fixtures.ts`) →
+ * application fixtures (`app.fixtures.ts`) → framework-wide guards (here).
+ * Import `expect` from here too, never from `@playwright/test`.
  */
-export const test = mergeTests(pageTest, apiTest).extend<{ environmentGuard: void }>({
+export const test = appTest.extend<{ environmentGuard: void }>({
   environmentGuard: [
     async ({}, use, testInfo) => {
       testInfo.skip(

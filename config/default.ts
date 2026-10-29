@@ -1,8 +1,9 @@
 import type { EnvironmentProfile } from '../src/types/config.types';
 
 /**
- * Baseline profile. Environment files in this folder override only what differs.
- * Do NOT put secrets here — see `.env.example`.
+ * Baseline profile for the application under test. Environment files in this folder override
+ * only what differs. Do NOT put secrets here — see `.env.example`.
+ * App-owned: `npm run init:project` replaces this file with a skeleton.
  */
 export const defaultProfile: EnvironmentProfile = {
   baseUrl: 'https://www.saucedemo.com',
@@ -12,6 +13,7 @@ export const defaultProfile: EnvironmentProfile = {
     performanceGlitch: 'performance_glitch_user',
     lockedOut: 'locked_out_user',
   },
+  testIdAttribute: 'data-test',
   timeouts: {
     test: 60_000,
     expect: 10_000,

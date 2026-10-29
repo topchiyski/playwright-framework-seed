@@ -35,6 +35,8 @@ const EnvSchema = z.object({
       [K in (typeof USER_ROLES)[number]]: z.ZodString;
     },
   ),
+  testIdAttribute: z.string().min(1),
+  webServer: z.object({ command: z.string().min(1), url: z.url() }).optional(),
   credentials: z.object({
     uiPassword: z.string({ error: 'UI_PASSWORD is required' }).min(1),
     apiUsername: z.string({ error: 'API_USERNAME is required' }).min(1),
@@ -56,10 +58,17 @@ const EnvSchema = z.object({
 
 export type Env = z.infer<typeof EnvSchema>;
 
+/** Empty values count as unset, so a blank CI secret falls through to the next source. */
+function nonEmpty(vars: Record<string, string | undefined>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(vars).filter((entry): entry is [string, string] => Boolean(entry[1])),
+  );
+}
+
 /** Reads a dotenv file without mutating `process.env`. Missing files are fine. */
 function readEnvFile(fileName: string): Record<string, string> {
   const filePath = path.join(ROOT_DIR, fileName);
-  return fs.existsSync(filePath) ? dotenv.parse(fs.readFileSync(filePath)) : {};
+  return fs.existsSync(filePath) ? nonEmpty(dotenv.parse(fs.readFileSync(filePath))) : {};
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -84,13 +93,14 @@ function defined<T extends Record<string, unknown>>(obj: T): Partial<T> {
 function loadEnv(): Env {
   // Precedence (highest first): real process env > .env.<TEST_ENV> > .env > config/<env>.ts > config/default.ts
   const shared = readEnvFile('.env');
+  const processEnv = nonEmpty(process.env);
   const envName = z
     .enum(ENVIRONMENTS, { error: `TEST_ENV must be one of: ${ENVIRONMENTS.join(', ')}` })
-    .parse(process.env.TEST_ENV ?? shared.TEST_ENV ?? 'qa');
+    .parse(processEnv.TEST_ENV ?? shared.TEST_ENV ?? 'qa');
   const raw: Record<string, string | undefined> = {
     ...shared,
     ...readEnvFile(`.env.${envName}`),
-    ...process.env,
+    ...processEnv,
   };
 
   const profile = deepMerge(defaultProfile as unknown as Record<string, unknown>, PROFILES[envName]);

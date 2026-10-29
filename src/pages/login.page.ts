@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import type { Locator, Page } from '@playwright/test';
 import { BasePage } from './base.page';
 

@@ -1,5 +1,6 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import { PRODUCTS, TAX_RATE } from '@utils/catalog';
-import { buildCheckoutInfo } from '@utils/data-factory';
+import { buildCheckoutInfo } from '@utils/builders';
 import { formatMoney, roundMoney } from '@utils/money';
 import { expect, TAG, test } from '@fixtures/index';
 

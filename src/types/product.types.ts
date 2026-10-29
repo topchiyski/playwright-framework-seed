@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 export interface Product {
   /** SauceDemo internal product id (used as the cart key in localStorage). */
   id: number;

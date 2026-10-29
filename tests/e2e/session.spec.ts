@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import { ALL_PRODUCTS } from '@utils/catalog';
 import { expect, TAG, test } from '@fixtures/index';
 

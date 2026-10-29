@@ -8,7 +8,17 @@ const noHardWaits = {
 };
 
 export default tseslint.config(
-  { ignores: ['node_modules/**', 'reports/**', 'allure-results/**', 'test-results/**', '.auth/**'] },
+  {
+    ignores: [
+      'node_modules/**',
+      'reports/**',
+      'allure-results/**',
+      'test-results/**',
+      '.auth/**',
+      // Skeleton files are only valid once copied into place; CI lints them after `init:project`.
+      'templates/**',
+    ],
+  },
 
   ...tseslint.configs.recommended,
 

@@ -2,14 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Playwright 1.64 + TypeScript E2E/API test framework (Node ≥22, Zod 4, Allure 3). UI target: SauceDemo; API target: Restful-Booker — public demo apps shared by every environment.
+Playwright 1.64 + TypeScript E2E/API test framework (Node ≥22, Zod 4, Allure 3). Facts about the application under test (targets, personas, app fixtures, quirks) are in `.claude/rules/app.md`.
 
 ## Invariants
 
-- IMPORTANT: Specs import `{ test, expect, TAG }` from `@fixtures/index`, not `@playwright/test` — the merged fixtures apply auth, data cleanup and the prod `@destructive` guard.
-- IMPORTANT: Specs start pre-authenticated through the `role` fixture (`test.use({ role })`, `'anonymous'` for logged-out flows). Only `tests/auth.setup.ts` logs in through the UI.
+- IMPORTANT: Specs import `{ test, expect, TAG }` from `@fixtures/index`, not `@playwright/test` — the layered fixtures apply auth, data cleanup and the prod `@destructive` guard.
+- IMPORTANT: Specs start pre-authenticated through the `role` fixture (`test.use({ role })`, `'anonymous'` for logged-out flows). Only `tests/auth.setup.ts` signs in, via the app's `authenticate` fixture.
 - Pages (`src/pages`) and API clients (`src/api`) return locators, data or `this`; every `expect` lives in a spec.
 - Read configuration from `env` (`@config/env`); it is the Zod-validated merge of `config/*.ts` and `.env`.
+- Framework files stay app-agnostic; application code goes in app-owned files (list: `docs/framework-guide.md#framework-and-application-code`).
 
 ## Commands
 
@@ -17,8 +18,8 @@ Playwright 1.64 + TypeScript E2E/API test framework (Node ≥22, Zod 4, Allure 3
 npx tsc --noEmit && npx eslint <changed files>                  # fast verify — after every edit
 npx playwright test <spec path> --project=e2e-chromium          # one UI spec (use --project=api for API specs)
 npx playwright test --grep "<test title>" --project=e2e-chromium # one test by title; or <spec path>:<line>
-npm run verify                                                  # typecheck + lint + prettier — before reporting done
-npm test                                                        # full suite, both browsers + API (~35s)
+npm run verify                                                  # typecheck + lint + prettier + docs links — before reporting done
+npm test                                                        # full suite, both browsers + API
 ```
 
 - Iterate on one spec and one browser project; run `npm test` once at the end, or whenever fixtures, `BasePage`, config or `playwright.config.ts` changed.
@@ -27,14 +28,14 @@ npm test                                                        # full suite, bo
 
 ## Where things go
 
-| Change                 | Location                                                                  | Pattern                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Page / UI widget       | `src/pages/*.page.ts`, `src/pages/components/`                            | Extend `BasePage` (`path`, `readyLocator`) / `BaseComponent` (`root`); add fixture            |
-| API endpoint           | `src/api/*.api.ts` + `src/api/schemas/`                                   | Raw `xxxResponse()` + typed `xxx()` via `parse(res, Schema)`                                  |
-| Test data / setup      | `src/fixtures/*.fixtures.ts`                                              | Create via API or app storage (`createBooking`, `seedCart`); register teardown with `cleanup` |
-| Setting / env var      | `src/types/config.types.ts` → `config/default.ts` → `EnvSchema` in env.ts | Env differences as `DeepPartial` in `config/<env>.ts`; secrets only in `.env` / CI            |
-| Persona                | `USER_ROLES` / `AUTH_ROLES` + `config/default.ts` users                   | `auth.setup.ts` writes `.auth/<role>.json` automatically                                      |
-| Expected values / tags | `src/utils/catalog.ts`, `TAG` in `src/utils/tags.ts`                      | Specs reference constants; npm scripts grep on tag strings                                    |
+| Change                 | Location                                                                     | Pattern                                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Page / UI widget       | `src/pages/*.page.ts`, `src/pages/components/`                               | Extend `BasePage` (`path`, `readyLocator`) / `BaseComponent` (`root`); fixture in `app.fixtures.ts` |
+| API endpoint           | `src/api/*.api.ts` + `src/api/schemas/`                                      | Raw `xxxResponse()` + typed `xxx()` via `parse(res, Schema)`; fixture in `app.fixtures.ts`          |
+| Test data / setup      | `src/fixtures/app.fixtures.ts`, builders in `src/utils/builders.ts`          | Create via API or app storage; register teardown with `cleanup`                                     |
+| Setting / env var      | `src/types/config.types.ts` → `config/default.ts` → `EnvSchema` in env.ts    | Env differences as `DeepPartial` in `config/<env>.ts`; secrets only in `.env` / CI                  |
+| Persona                | `config/personas.ts` + `users` in `config/default.ts`                        | `auth.setup.ts` writes `.auth/<role>.json` for each `AUTH_ROLES` entry                              |
+| Expected values / tags | app data module (demo: `src/utils/catalog.ts`); `TAG` in `src/utils/tags.ts` | Specs reference constants; npm scripts grep on tag strings                                          |
 
 Imports use tsconfig aliases: `@api` `@config` `@fixtures` `@pages` `@utils` `@app-types` (src/types) `@env-config` (config/). Detailed rules for pages/specs, the API layer and config load from `.claude/rules/` when matching files are opened.
 
@@ -42,7 +43,7 @@ Imports use tsconfig aliases: `@api` `@config` `@fixtures` `@pages` `@utils` `@a
 
 - Output dirs `.auth/` (live session cookies), `test-results/`, `reports/`, `allure-results/` are regenerated by runs; change the code that produces them instead.
 - `.env` is required (copy `.env.example`); startup throws a Zod error naming any missing variable.
-- Backends are shared public services: build data with `@utils/data-factory` (`uniqueId`), register cleanup for everything created, and tag mutating tests `TAG.destructive`.
+- Build data with `@utils/data-factory` (`uniqueId`), register cleanup for everything created, and tag mutating tests `TAG.destructive`.
 - Prettier runs automatically after each Edit/Write (PostToolUse hook) — no manual formatting pass needed.
 
 ## Verification

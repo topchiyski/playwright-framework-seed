@@ -1,13 +1,14 @@
+import { AUTH_ROLES, DEFAULT_ROLE, USER_ROLES } from '../../config/personas';
+
 export const ENVIRONMENTS = ['qa', 'staging', 'prod'] as const;
 export type EnvironmentName = (typeof ENVIRONMENTS)[number];
 
-/** Every SauceDemo persona the framework knows about. */
-export const USER_ROLES = ['standard', 'performanceGlitch', 'lockedOut'] as const;
+// Personas are app-owned and defined in config/personas.ts.
+export { AUTH_ROLES, DEFAULT_ROLE, USER_ROLES };
 export type UserRole = (typeof USER_ROLES)[number];
-
-/** Personas that can actually sign in and therefore get a pre-built storage state. */
-export const AUTH_ROLES = ['standard', 'performanceGlitch'] as const satisfies readonly UserRole[];
 export type AuthRole = (typeof AUTH_ROLES)[number];
+/** A persona with a saved session, or a logged-out context. */
+export type SessionRole = AuthRole | 'anonymous';
 
 export const LOG_LEVELS = ['debug', 'info', 'warn', 'error'] as const;
 export type LogLevel = (typeof LOG_LEVELS)[number];
@@ -20,6 +21,14 @@ export interface EnvironmentProfile {
   baseUrl: string;
   apiBaseUrl: string;
   users: Record<UserRole, string>;
+  /** Attribute `getByTestId()` matches, e.g. `data-testid` (Playwright default) or `data-test`. */
+  testIdAttribute: string;
+  /** Command Playwright runs to start the app before tests; omit when testing a deployed app. */
+  webServer?: {
+    command: string;
+    /** Polled until it answers; tests start afterwards. */
+    url: string;
+  };
   timeouts: {
     /** Per-test timeout (ms). */
     test: number;

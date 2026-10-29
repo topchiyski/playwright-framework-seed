@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import { z } from 'zod';
 
 const isoDate = z.iso.date();

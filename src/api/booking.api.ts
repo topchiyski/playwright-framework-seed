@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 import { BaseApiClient } from './base-api.client';
 import {

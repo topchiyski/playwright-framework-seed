@@ -13,6 +13,8 @@ const SKIP_DIRS = new Set([
   'allure-report',
   'playwright-report',
   '.auth',
+  // Skeleton docs link relative to where init:project copies them; checked in CI after init.
+  'templates',
 ]);
 
 function findMarkdown(dir) {

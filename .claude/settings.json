@@ -2,14 +2,16 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
+      "Bash(npm ci)",
+      "Bash(npm test *)",
+      "Bash(npm run *)",
       "Bash(npx tsc *)",
       "Bash(npx eslint *)",
       "Bash(npx prettier *)",
-      "Bash(npx playwright test *)",
       "Bash(npx playwright *)",
-      "Bash(npm run *)",
-      "Bash(echo \"exit:$?\")",
-      "Bash(LOG_LEVEL=warn npm test -- --reporter=dot)"
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)"
     ],
     "deny": [
       "Read(./.env)",

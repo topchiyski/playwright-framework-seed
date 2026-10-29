@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import type { SortOption } from '@app-types/product.types';
 import { ALL_PRODUCTS, PRODUCTS } from '@utils/catalog';
 import { formatMoney } from '@utils/money';

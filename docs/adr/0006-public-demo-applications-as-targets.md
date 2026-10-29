@@ -16,5 +16,5 @@ The framework was built without a specific application under test. It needed rea
 ## Consequences
 
 - The suite runs anywhere with internet access and the public demo credentials.
-- Both services are shared and outside our control: they may be slow, reset data, or change markup. Tests use unique data, never assume an empty system, and assert the services' quirks as-is (documented in the [framework guide](../framework-guide.md#known-quirks-of-the-test-targets)).
+- Both services are shared and outside our control: they may be slow, reset data, or change markup. Tests use unique data, never assume an empty system, and assert the services' quirks as-is (documented in [the application under test](../app.md#known-quirks)).
 - Moving to a real product means replacing URLs, credentials, page objects, schemas and catalog data; the framework layers (fixtures, configuration, cleanup, reporting) stay unchanged.

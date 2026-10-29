@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import { credentialsFor } from '@config/auth';
 import { env } from '@config/env';
 import { expect, TAG, test } from '@fixtures/index';

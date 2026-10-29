@@ -31,6 +31,14 @@ export default defineConfig({
   // Fail fast in CI if something is fundamentally broken (e.g. env down).
   maxFailures: env.isCI ? 25 : undefined,
 
+  // Starts the app under test first when the profile defines a command (e.g. a local dev server).
+  webServer: env.webServer && {
+    command: env.webServer.command,
+    url: env.webServer.url,
+    reuseExistingServer: !env.isCI,
+    timeout: env.timeouts.navigation * 2,
+  },
+
   reporter: [
     [env.isCI ? 'dot' : 'list'],
     ['html', { outputFolder: 'reports/html', open: 'never' }],
@@ -54,7 +62,7 @@ export default defineConfig({
   use: {
     baseURL: env.baseUrl,
     headless: env.headless,
-    testIdAttribute: 'data-test',
+    testIdAttribute: env.testIdAttribute,
     actionTimeout: env.timeouts.action,
     navigationTimeout: env.timeouts.navigation,
     trace: 'retain-on-failure',

@@ -4,9 +4,30 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-29
+
+Turns the repository into a seed project: start your own suite with one command.
+
+### Added
+
+- `npm run init:project -- --name <pkg> [--yes]`: removes the demo and installs a working skeleton (home page object, health-check API client, one UI and one API smoke test, placeholder config) from `templates/skeleton/`. Dry run by default; removes itself afterwards.
+- Local sandbox app in the skeleton, started by Playwright, so a new project passes its tests offline on day one.
+- `webServer` profile setting: Playwright starts the app under test before the tests.
+- `testIdAttribute` profile setting (was hard-coded to SauceDemo's `data-test`).
+- `authenticate` application fixture: the app's sign-in steps; `tests/auth.setup.ts` is now app-agnostic.
+- `config/personas.ts` with `USER_ROLES`, `AUTH_ROLES` and a configurable `DEFAULT_ROLE`.
+- GitHub Actions: `ci.yml` (verify on Node 22 and 26, full suite, report upload) and `seed-init.yml` (tests the init path). Dependabot for npm and GitHub Actions.
+- Docs: [Make it yours](docs/make-it-yours.md), [the application under test](docs/app.md), [ADR-0007](docs/adr/0007-separate-framework-from-application.md), first-run troubleshooting, framework-vs-application ownership table, CI reference.
+- MIT license.
+
 ### Changed
 
 - Minimum Node.js raised from 20 to 22; Node 20 reached end-of-life on 2026-04-30.
+- Fixtures split into `base.fixtures.ts` (framework) → `app.fixtures.ts` (application) → `index.ts`; `page.fixtures.ts` and `api.fixtures.ts` are gone.
+- Demo data builders moved from `@utils/data-factory` to `@utils/builders`; `data-factory` keeps the app-independent `uniqueId()` and `isoDate()`.
+- Empty environment variables now count as unset, so blank CI secrets fall back to `.env`.
+- Demo files are marked with a `// Demo app` comment; application facts moved from the framework docs, `CLAUDE.md` and Claude rules into `docs/app.md` and `.claude/rules/app.md`.
+- `.claude/settings.json` holds a team allowlist only; personal permissions belong in the git-ignored `settings.local.json`.
 
 ### Security
 

@@ -1,6 +1,6 @@
 # How-to guides
 
-Task-focused recipes. Each assumes you have completed [Getting started](getting-started.md). For background on _why_ things work this way, see the [framework guide](framework-guide.md).
+Task-focused recipes. Each assumes you have completed [Getting started](getting-started.md). For background on _why_ things work this way, see the [framework guide](framework-guide.md). Examples use the demo suite from the [seed repository](https://github.com/topchiyski/playwright-framework); the steps are the same for any application. Starting a new project from this seed is covered separately in [Make it yours](make-it-yours.md).
 
 - [Run exactly the tests you need](#run-exactly-the-tests-you-need)
 - [Add a page object](#add-a-page-object)
@@ -84,7 +84,7 @@ Checklist:
 export { ProductDetailsPage } from './product-details.page';
 ```
 
-**3. Register a fixture** in `src/fixtures/page.fixtures.ts` — add `productDetailsPage: ProductDetailsPage;` to `PageFixtures` and:
+**3. Register a fixture** in `src/fixtures/app.fixtures.ts` — add `productDetailsPage: ProductDetailsPage;` to `AppFixtures` and:
 
 ```ts
 productDetailsPage: async ({ page }, use) => use(new ProductDetailsPage(page)),
@@ -142,7 +142,7 @@ async get(id: number): Promise<Room> {
 }
 ```
 
-**3. Register a fixture** in `src/fixtures/api.fixtures.ts` (`roomApi: async ({ apiRequest }, use) => use(new RoomApi(apiRequest))`) and export the client and schema from `src/api/index.ts`.
+**3. Register a fixture** in `src/fixtures/app.fixtures.ts` (`roomApi: async ({ apiRequest }, use) => use(new RoomApi(apiRequest))`) and export the client and schema from `src/api/index.ts`.
 
 **4. Test it** — status and contract with the raw method, data with the typed one:
 
@@ -155,7 +155,7 @@ expect(body).toMatchSchema(RoomSchema);
 
 > Type the JSON as `unknown` before using `toMatchSchema`. Playwright hides custom matchers when the value is `any`, which is what `response.json()` returns, so the code would not type-check.
 
-For an endpoint that creates data, also add a creation fixture that registers deletion — copy `createBooking` in `api.fixtures.ts`.
+For an endpoint that creates data, also add a creation fixture that registers deletion — copy the demo's `createBooking` in `app.fixtures.ts`.
 
 ## Set up test data and clean it up
 
@@ -180,7 +180,7 @@ Rules:
 
 - Register cleanup **right after** the create call, before any assertion that could fail.
 - Make cleanup **idempotent** (it must succeed if the test already deleted the data) — see `deleteIfExists`.
-- Generate unique values with `buildBooking()`, `buildCheckoutInfo()` and `uniqueId()` from `@utils/data-factory`; never reuse fixed names on shared systems.
+- Generate unique values — never reuse fixed names on shared systems. Framework helpers `uniqueId()` and `isoDate()` live in `@utils/data-factory`; complete payload builders for your application go in `@utils/builders` (the demo's are `buildBooking()` and `buildCheckoutInfo()`).
 
 ## Test as a different persona
 
@@ -190,14 +190,15 @@ At the top of a file or inside a `describe` block:
 test.use({ role: 'performanceGlitch' });
 ```
 
-Use `role: 'anonymous'` to start logged out. Available personas are listed in the [reference](reference.md#personas).
+Use `role: 'anonymous'` to start logged out. The available personas are listed in [the application under test](app.md#personas).
 
 ## Add a persona
 
-1. Add the persona key to `USER_ROLES` in `src/types/config.types.ts`. If it can log in, also add it to `AUTH_ROLES`.
+1. Add the persona key to `USER_ROLES` in `config/personas.ts`. If it can sign in, also add it to `AUTH_ROLES`.
 2. Add its username to `users` in `config/default.ts` (and to an environment profile if it differs there).
-3. Run any UI test. The `setup` project automatically logs the new persona in and writes `.auth/<persona>.json`.
-4. Use it with `test.use({ role: '<persona>' })`.
+3. Run any UI test. The `setup` project signs the new persona in through the `authenticate` fixture and writes `.auth/<persona>.json`.
+4. Use it with `test.use({ role: '<persona>' })`, or make it the default by setting `DEFAULT_ROLE`.
+5. Add it to the personas table in [docs/app.md](app.md#personas).
 
 TypeScript will point out anything you missed, because `users` must contain every key in `USER_ROLES`.
 
@@ -217,7 +218,7 @@ Secrets are the exception: they never get a profile default. Add them only to th
 2. Create `config/<name>.ts` exporting a `DeepPartial<EnvironmentProfile>` with only the differences from `default.ts`.
 3. Register it in the `PROFILES` map in `src/config/env.ts`.
 4. Add an npm script: `"test:<name>": "cross-env TEST_ENV=<name> playwright test"`.
-5. Add a row to the [environments table](reference.md#environments).
+5. Add a column to the [profile settings table](reference.md#profile-settings).
 
 ## Tag tests and run safely against production
 

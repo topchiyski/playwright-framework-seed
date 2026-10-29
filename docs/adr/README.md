@@ -10,6 +10,7 @@ An ADR captures one significant design decision: the situation, what was decided
 | [0004](0004-two-layer-api-clients.md)                 | Two methods per API endpoint: raw and contract-validated       | Accepted |
 | [0005](0005-seed-state-and-clean-up.md)               | Seed test state without the UI; LIFO cleanup registry          | Accepted |
 | [0006](0006-public-demo-applications-as-targets.md)   | Public demo applications as test targets                       | Accepted |
+| [0007](0007-separate-framework-from-application.md)   | Separate framework from application code; one-command init     | Accepted |
 
 ## Writing a new ADR
 

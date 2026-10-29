@@ -4,8 +4,9 @@ import { AUTH_ROLES } from '@app-types/config.types';
 import { expect, test as setup } from '@fixtures/index';
 
 /**
- * Runs once per test run (project `setup`). Logs every persona in through the UI a single
- * time and persists the session, so no spec ever logs in through the UI.
+ * Runs once per test run (project `setup`). Signs every persona in `AUTH_ROLES` in a single
+ * time and saves the session, so no spec ever logs in through the UI. The sign-in steps
+ * themselves are app-specific and come from the `authenticate` fixture (`app.fixtures.ts`).
  */
 setup.use({ role: 'anonymous' });
 
@@ -14,14 +15,10 @@ setup.beforeAll(() => {
 });
 
 for (const role of AUTH_ROLES) {
-  setup(`authenticate as ${role}`, async ({ page, loginPage, inventoryPage }) => {
-    const { username, password } = credentialsFor(role);
+  setup(`authenticate as ${role}`, async ({ page, authenticate }) => {
+    const landingPage = await authenticate(credentialsFor(role));
 
-    await loginPage.goto();
-    await loginPage.login(username, password);
-
-    await expect(page).toHaveURL(inventoryPage.urlPattern);
-    await expect(inventoryPage.readyLocator).toBeVisible();
+    await expect(landingPage.readyLocator).toBeVisible();
 
     await page.context().storageState({ path: storageStatePath(role) });
   });

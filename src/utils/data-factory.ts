@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import type { BookingPayload } from '@api/schemas/booking.schema';
-import type { CheckoutInfo } from '@app-types/product.types';
+
+/**
+ * App-independent building blocks for test data. App-specific builders (complete payloads for
+ * your API or forms) live in `builders.ts` and use these.
+ */
 
 /** Short unique suffix so parallel workers never collide on shared environments. */
 export function uniqueId(prefix = 'pw'): string {
@@ -12,25 +15,4 @@ export function isoDate(offsetDays = 0): string {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() + offsetDays);
   return date.toISOString().slice(0, 10);
-}
-
-export function buildBooking(overrides: Partial<BookingPayload> = {}): BookingPayload {
-  return {
-    firstname: 'Auto',
-    lastname: uniqueId('Test'),
-    totalprice: 100 + Math.floor(Math.random() * 900),
-    depositpaid: true,
-    bookingdates: { checkin: isoDate(7), checkout: isoDate(10) },
-    additionalneeds: 'Breakfast',
-    ...overrides,
-  };
-}
-
-export function buildCheckoutInfo(overrides: Partial<CheckoutInfo> = {}): CheckoutInfo {
-  return {
-    firstName: 'Ada',
-    lastName: uniqueId('Lovelace'),
-    postalCode: String(10_000 + Math.floor(Math.random() * 89_999)),
-    ...overrides,
-  };
 }

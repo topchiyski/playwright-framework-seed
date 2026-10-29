@@ -1,0 +1,42 @@
+# Proves the seed promise: `npm run init:project` turns this repository into a clean skeleton
+# that passes verify and its tests. `init:project` deletes this workflow in projects it creates.
+name: Seed init
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: seed-init-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  skeleton:
+    name: Init skeleton, verify and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run init:project -- --name ci-skeleton --yes
+      - run: npx playwright install --with-deps chromium firefox
+      - run: npm run verify
+      - run: npm test
+      - name: Upload failure artifacts
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: skeleton-results
+          path: |
+            reports/
+            test-results/
+          retention-days: 7

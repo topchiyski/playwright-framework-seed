@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import type { Product } from '@app-types/product.types';
 
 /** Static SauceDemo catalog — the source of truth for expected names/prices in assertions. */

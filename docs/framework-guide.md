@@ -1,6 +1,6 @@
 # Framework guide
 
-This guide explains how the framework is built and why. Read it once before making structural changes. For step-by-step tasks see the [how-to guides](how-to.md); for exact names and values see the [reference](reference.md).
+This guide explains how the framework is built and why. Read it once before making structural changes. For step-by-step tasks see the [how-to guides](how-to.md); for exact names and values see the [reference](reference.md). Examples come from the demo suite in the [seed repository](https://github.com/topchiyski/playwright-framework) (SauceDemo web shop + Restful-Booker API); the application this suite tests is described in [the application under test](app.md).
 
 ## Design goals
 
@@ -43,6 +43,22 @@ flowchart TD
 
 Dependencies point one way: specs → fixtures → page objects / API clients → utilities → configuration. Nothing in `src/` imports from `tests/`.
 
+## Framework and application code
+
+Every file belongs either to the **framework** (reusable for any application) or to the **application under test**. Keeping them apart is what lets a new project replace the demo in one command (`npm run init:project`, see [Make it yours](make-it-yours.md)) and later take framework updates from the seed without merge pain.
+
+| Owner           | Files                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Framework**   | `src/config/`, `src/fixtures/base.fixtures.ts`, `src/fixtures/index.ts`, `src/fixtures/matchers.ts`, `src/pages/base.page.ts`, `src/pages/components/base.component.ts`, `src/api/base-api.client.ts`, `src/utils/{cleanup-registry,data-factory,logger,tags}.ts`, `src/types/config.types.ts`, `tests/auth.setup.ts`, `playwright.config.ts`, `config/{qa,staging,prod}.ts`, tooling (`scripts/`, lint/TS/Prettier config, `.github/`) |
+| **Application** | `config/default.ts`, `config/personas.ts`, `src/fixtures/app.fixtures.ts`, all other page objects, components, API clients and schemas, `src/utils/builders.ts` and other test-data modules, the specs in `tests/e2e/` and `tests/api/`, [docs/app.md](app.md)                                                                                                                                                                          |
+
+Two hand-over points connect them, so framework code never names an application page:
+
+- **`app.fixtures.ts`** extends the framework fixtures with the application's page objects, clients and data helpers, and supplies `authenticate` — the app's sign-in steps.
+- **`config/personas.ts` and `config/default.ts`** declare the personas, URLs, test-ID attribute and optional `webServer` that the framework reads through `env`.
+
+Demo application files are marked with a `// Demo app` comment on their first line.
+
 ## How a test run flows
 
 ```mermaid
@@ -81,7 +97,7 @@ Code reads settings only through `env`, never through `process.env`, so every se
 
 Logging in through the UI in every test is slow and makes every test depend on the login page. Instead:
 
-1. The `setup` project (`tests/auth.setup.ts`) logs in **once per persona** and saves the browser session (cookies and local storage) to `.auth/<persona>.json`.
+1. The `setup` project (`tests/auth.setup.ts`) signs in **once per persona** listed in `AUTH_ROLES` (`config/personas.ts`) and saves the browser session (cookies and local storage) to `.auth/<persona>.json`. The sign-in steps themselves are application-specific: `auth.setup.ts` calls the `authenticate` fixture from `app.fixtures.ts` and checks that the page it returns is ready.
 2. Every UI test starts a fresh browser context **pre-loaded with that session**. Which session is chosen by the `role` fixture option:
 
 ```ts
@@ -89,18 +105,18 @@ test.use({ role: 'performanceGlitch' }); // a different persona
 test.use({ role: 'anonymous' }); // logged out — for testing the login page itself
 ```
 
-The default is `'standard'`. The login page is still tested — in `login.spec.ts`, with `role: 'anonymous'` — but no other test pays for it. See [ADR-0001](adr/0001-authenticate-via-saved-sessions.md).
+The default is `DEFAULT_ROLE` from `config/personas.ts`. The login page is still tested — in the demo's `login.spec.ts`, with `role: 'anonymous'` — but no other test pays for it. See [ADR-0001](adr/0001-authenticate-via-saved-sessions.md).
 
 ## Fixtures: the spec's toolbox
 
-Playwright [fixtures](https://playwright.dev/docs/test-fixtures) are named dependencies a test asks for in its parameter list; Playwright builds them before the test and tears them down after. All of this project's fixtures are combined in `src/fixtures/index.ts`:
+Playwright [fixtures](https://playwright.dev/docs/test-fixtures) are named dependencies a test asks for in its parameter list; Playwright builds them before the test and tears them down after. The project's fixtures are built in three layers:
 
-| File               | Provides                                                                                    |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| `page.fixtures.ts` | `role`, the session-loading `storageState`, every page object, `seedCart`                   |
-| `api.fixtures.ts`  | an API connection and admin token (one per worker), API clients, `cleanup`, `createBooking` |
-| `matchers.ts`      | extra assertions: `toHaveStatus`, `toMatchSchema`                                           |
-| `index.ts`         | merges the above and adds the automatic `@destructive` guard                                |
+| File               | Layer       | Provides                                                                                               |
+| ------------------ | ----------- | ------------------------------------------------------------------------------------------------------ |
+| `base.fixtures.ts` | framework   | `role` and the session-loading `storageState`, `cleanup`, one API connection per worker (`apiRequest`) |
+| `app.fixtures.ts`  | application | `authenticate`, page objects, API clients, data helpers (demo: `seedCart`, `createBooking`)            |
+| `index.ts`         | framework   | the final `test`: everything above plus the automatic `@destructive` guard                             |
+| `matchers.ts`      | framework   | extra assertions: `toHaveStatus`, `toMatchSchema` (re-exported as `expect` from `index.ts`)            |
 
 Because every spec imports `test` from `@fixtures/index`, cross-cutting behaviour — authentication, cleanup, the production guard — applies everywhere without each test opting in. A lint rule forbids importing `test` from `@playwright/test` in specs so this cannot be bypassed by accident. Full list: [reference — fixtures](reference.md#fixtures).
 
@@ -119,7 +135,7 @@ Prefer what a user perceives, in this order:
 1. `getByRole` — buttons, links, headings, navigation (`getByRole('button', { name: 'Checkout' })`)
 2. `getByPlaceholder` / `getByLabel` — form fields
 3. `getByText` — visible text
-4. `getByTestId` — elements with no accessible handle; this project maps it to SauceDemo's `data-test` attribute
+4. `getByTestId` — elements with no accessible handle; the attribute it matches is the `testIdAttribute` setting (the demo uses SauceDemo's `data-test`)
 
 User-facing locators survive markup refactors and fail when the user experience actually changes, which is exactly when a test should fail.
 
@@ -140,10 +156,13 @@ The typed method insists on a 2xx status and validates the body against a Zod sc
 
 ## Test data lifecycle
 
-State that a test needs but is not testing is created **without the UI**, and anything created is **removed afterwards**:
+State that a test needs but is not testing is created **without the UI**, and anything created is **removed afterwards**. The demo shows both techniques:
 
-- `seedCart(...products)` writes the cart straight into SauceDemo's browser storage and opens the cart page — no clicking through the inventory.
+- `seedCart(...products)` writes the cart straight into the application's browser storage and opens the cart page — no clicking through the inventory.
 - `createBooking()` creates a booking through the API and registers its deletion.
+
+The framework part is the cleanup registry:
+
 - `cleanup.register(label, fn)` registers any other teardown. Registered tasks run after the test, **last-in-first-out**, **whether the test passed or failed**. Every task runs even if an earlier one fails; failures are reported together.
 
 This keeps tests fast, independent of each other, and safe to run against shared environments. See [ADR-0005](adr/0005-seed-state-and-clean-up.md).
@@ -164,6 +183,8 @@ Every run writes:
 
 For failed tests, Playwright keeps a **trace**, a **screenshot** and a **video** in `test-results/`. Passing tests keep nothing, so artifacts stay small. See [how to debug a failing test](how-to.md#debug-a-failing-test).
 
+> **Keep Allure reports private for now.** Allure 3.22's pre-built report viewer embeds DOMPurify 3.4.16, which has known sanitizer bypasses. The project patches the npm-installed copy, but not the copy inside the generated report. Do not publish Allure reports (e.g. as a hosted CI page) until an Allure release ships DOMPurify ≥ 3.4.17; see the [seed changelog](https://github.com/topchiyski/playwright-framework/blob/main/CHANGELOG.md).
+
 ## Quality gates
 
 `npm run verify` must pass before a change is merged. It runs:
@@ -175,10 +196,6 @@ For failed tests, Playwright keeps a **trace**, a **screenshot** and a **video**
 | Prettier       | formatting drift                                                                                                                     |
 | `docs:check`   | broken relative links and anchors in the Markdown docs                                                                               |
 
-## Known quirks of the test targets
+The same gate runs in **continuous integration** on every push and pull request (`.github/workflows/ci.yml`): `verify` on the oldest and newest supported Node LTS, then the full suite in both browsers, with reports and failure artifacts uploaded. In the seed repository a second workflow (`seed-init.yml`) runs `init:project` on a fresh copy and tests the resulting skeleton, so the "start your own project" path can never silently break. Dependabot proposes dependency updates weekly.
 
-These are behaviours of the demo applications, not bugs in the framework. Tests assert them as they are.
-
-- SauceDemo's side-menu entries (All Items, Logout, Reset App State) are **buttons**, not links; only About is a link.
-- Restful-Booker answers a successful `DELETE` with **201**, a bad login with **200** and `{ "reason": "Bad credentials" }`, and a delete of a missing booking with **405**.
-- Restful-Booker is a public, shared service: other people's data appears in list results, and the service resets periodically. Tests therefore use unique names and never assume an empty system.
+Behaviour specific to the application under test — including quirks of the demo services — is documented in [the application under test](app.md#known-quirks).

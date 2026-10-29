@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). `npm run init:project` replaces this file with a skeleton.
 export { BasePage } from './base.page';
 export { LoginPage } from './login.page';
 export { InventoryPage } from './inventory.page';

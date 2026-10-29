@@ -15,6 +15,15 @@ npm test
 
 Wait for `58 passed`. A green run proves your machine, browsers and credentials are ready before you change anything.
 
+### If the first run fails
+
+| Symptom                                                       | Likely cause and fix                                                                                                                                                                                                                        |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Invalid test configuration … is required`                    | `.env` is missing — run `cp .env.example .env`.                                                                                                                                                                                             |
+| `Executable doesn't exist` for a browser                      | Browsers not installed — run `npm run install:browsers`.                                                                                                                                                                                    |
+| Many tests fail with `page.goto: Timeout` in one browser only | Something on your machine filters that browser's traffic — e.g. AdGuard or a corporate proxy hooking `firefox.exe`. Exclude Playwright's browsers (in `%LOCALAPPDATA%\ms-playwright` on Windows) from filtering, or pause it while testing. |
+| Many tests fail with timeouts in every browser                | The public demo sites (SauceDemo, Restful-Booker) are slow or down. Check them in a normal browser and retry later; `npm run test:smoke` is a quick probe.                                                                                  |
+
 ## 2. Create the spec file
 
 Create `tests/e2e/my-first.spec.ts`:

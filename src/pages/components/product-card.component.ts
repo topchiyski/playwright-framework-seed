@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import type { Locator } from '@playwright/test';
 import type { DisplayedProduct } from '@app-types/product.types';
 import { parseMoney } from '@utils/money';

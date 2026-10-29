@@ -1,13 +1,30 @@
 {
   "name": "playwright-framework",
-  "version": "1.0.0",
-  "description": "Enterprise-grade Playwright E2E + API test framework (TypeScript, POM, fixtures, Zod-validated multi-env config).",
+  "version": "1.1.0",
+  "description": "Seed project for Playwright + TypeScript E2E and API test suites: Page Objects, saved-session auth, Zod-validated multi-environment config, contract-checked API clients, automatic test-data cleanup.",
   "private": true,
   "type": "commonjs",
+  "license": "MIT",
+  "author": "Stoyan Topchiyski",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/topchiyski/playwright-framework.git"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "e2e-testing",
+    "api-testing",
+    "test-automation",
+    "page-object-model",
+    "seed",
+    "template"
+  ],
   "engines": {
     "node": ">=22"
   },
   "scripts": {
+    "init:project": "node scripts/init-project.mjs",
     "test": "playwright test",
     "test:e2e": "playwright test --project=e2e-chromium --project=e2e-firefox",
     "test:api": "playwright test --project=api",

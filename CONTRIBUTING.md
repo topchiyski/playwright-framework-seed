@@ -52,15 +52,24 @@ A pull request is ready when every applicable item holds.
 
 Docs live next to the code and change with it:
 
-| You changed…                                             | Update                                                                                 |
-| -------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| A fixture, script, tag, variable, environment or persona | [docs/reference.md](docs/reference.md)                                                 |
-| A procedure (how to add or do something)                 | [docs/how-to.md](docs/how-to.md)                                                       |
-| Architecture or a cross-cutting mechanism                | [docs/framework-guide.md](docs/framework-guide.md) and a new [ADR](docs/adr/README.md) |
-| Anything user-visible                                    | [CHANGELOG.md](CHANGELOG.md) under _Unreleased_                                        |
-| A rule Claude Code should follow                         | [CLAUDE.md](CLAUDE.md) or `.claude/rules/`                                             |
+| You changed…                                                       | Update                                                                                 |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| A framework fixture, script, tag, variable, setting or CI workflow | [docs/reference.md](docs/reference.md)                                                 |
+| The application: URLs, personas, app fixtures, quirks              | [docs/app.md](docs/app.md) and `.claude/rules/app.md`                                  |
+| A procedure (how to add or do something)                           | [docs/how-to.md](docs/how-to.md)                                                       |
+| Architecture or a cross-cutting mechanism                          | [docs/framework-guide.md](docs/framework-guide.md) and a new [ADR](docs/adr/README.md) |
+| Anything user-visible                                              | [CHANGELOG.md](CHANGELOG.md) under _Unreleased_                                        |
+| A rule Claude Code should follow                                   | [CLAUDE.md](CLAUDE.md) or `.claude/rules/`                                             |
 
-`npm run docs:check` (part of `verify`) fails on broken relative links or anchors.
+`npm run docs:check` (part of `verify`) fails on broken relative links or anchors. CI runs `verify` and the full suite on every pull request; see [continuous integration](docs/reference.md#continuous-integration).
+
+## Changing the seed itself
+
+In the seed repository, also keep the "start your own project" path working:
+
+- New framework code goes in framework-owned files ([list](docs/framework-guide.md#framework-and-application-code)); demo code gets the `// Demo app` marker and, if it is a new file, an entry in `DEMO_PATHS` in `scripts/init-project.mjs`.
+- If a change affects what a fresh project needs, update `templates/skeleton/` too.
+- The `Seed init` workflow must stay green: it runs `init:project` and tests the skeleton.
 
 ## Commit messages
 

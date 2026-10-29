@@ -1,3 +1,4 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 /** Extracts the numeric amount from UI text such as `$29.99` or `Item total: $29.99`. */
 export function parseMoney(text: string): number {
   const match = /\$\s*(\d+(?:\.\d+)?)/.exec(text);

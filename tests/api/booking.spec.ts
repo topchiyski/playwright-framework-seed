@@ -1,5 +1,7 @@
+// Demo app (SauceDemo + Restful-Booker). Removed by `npm run init:project`.
 import { BookingSchema, CreatedBookingSchema } from '@api/schemas/booking.schema';
-import { buildBooking, isoDate } from '@utils/data-factory';
+import { buildBooking } from '@utils/builders';
+import { isoDate } from '@utils/data-factory';
 import { expect, TAG, test } from '@fixtures/index';
 
 test.describe('Booking API', () => {
