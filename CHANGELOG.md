@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Minimum Node.js raised from 20 to 22; Node 20 reached end-of-life on 2026-04-30.
 
+### Security
+
+- Pinned `dompurify` to 3.4.17 via npm `overrides`. Allure 3.22.1 depends on 3.4.16, which is affected by GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr and GHSA-c6gr-qvv4-5v3f.
+  - **Partial fix:** this patches the npm-installed copy (`npm audit` is clean), but the Allure HTML report viewer is pre-built by Allure with DOMPurify 3.4.16 inside it, so generated reports still contain the vulnerable version. Treat Allure reports as local artifacts and do not publish them until Allure ships a release built with DOMPurify ≥ 3.4.17.
+  - Remove the override after upgrading to that Allure release.
+
 ## [1.0.0] - 2026-10-29
 
 ### Added
