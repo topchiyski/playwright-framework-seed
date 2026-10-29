@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Playwright 1.64 + TypeScript E2E/API test framework (Node ≥20, Zod 4, Allure 3). UI target: SauceDemo; API target: Restful-Booker — public demo apps shared by every environment.
+Playwright 1.64 + TypeScript E2E/API test framework (Node ≥22, Zod 4, Allure 3). UI target: SauceDemo; API target: Restful-Booker — public demo apps shared by every environment.
 
 ## Invariants
 

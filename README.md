@@ -18,7 +18,7 @@ What you get out of the box:
 
 ## Quick start
 
-Prerequisites: **Node.js 20+** and npm.
+Prerequisites: **Node.js 22+** (an [active or maintenance LTS](https://nodejs.org/en/about/previous-releases)) and npm.
 
 ```bash
 npm ci                      # 1. install dependencies

@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Changed
+
+- Minimum Node.js raised from 20 to 22; Node 20 reached end-of-life on 2026-04-30.
+
 ## [1.0.0] - 2026-10-29
 
 ### Added
