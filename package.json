@@ -1,0 +1,47 @@
+{
+  "name": "playwright-framework",
+  "version": "1.0.0",
+  "description": "Enterprise-grade Playwright E2E + API test framework (TypeScript, POM, fixtures, Zod-validated multi-env config).",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test --project=e2e-chromium --project=e2e-firefox",
+    "test:api": "playwright test --project=api",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:qa": "cross-env TEST_ENV=qa playwright test",
+    "test:staging": "cross-env TEST_ENV=staging playwright test",
+    "test:prod": "cross-env TEST_ENV=prod playwright test --grep @smoke --grep-invert @destructive",
+    "test:headed": "playwright test --headed --project=e2e-chromium",
+    "test:debug": "playwright test --debug --project=e2e-chromium",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report reports/html",
+    "allure:generate": "node -e \"require('fs').rmSync('reports/allure',{recursive:true,force:true})\" && allure generate allure-results -o reports/allure",
+    "allure:open": "allure open reports/allure",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "docs:check": "node scripts/check-docs.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run docs:check",
+    "install:browsers": "playwright install --with-deps chromium firefox"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.6",
+    "allure": "^3.22.1",
+    "allure-playwright": "^3.14.0",
+    "cross-env": "^10.1.0",
+    "dotenv": "^18.0.9",
+    "eslint": "^10.13.0",
+    "eslint-plugin-playwright": "^2.12.1",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "zod": "^4.6.7"
+  }
+}

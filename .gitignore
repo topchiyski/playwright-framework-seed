@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Secrets / local env
+.env
+.env.*
+!.env.example
+
+# Auth storage state (contains live session cookies)
+.auth/
+
+# Test output & reports
+test-results/
+reports/
+allure-results/
+allure-report/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Tool caches
+*.tsbuildinfo
+.eslintcache
+*.log
+
+# Claude Code — personal overrides and worktrees (shared .claude/settings.json, rules, hooks stay committed)
+.claude/settings.local.json
+.claude/worktrees/
+CLAUDE.local.md
+
+# Editors — share only recommended extensions
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)",
+      "Bash(npx prettier *)",
+      "Bash(npx playwright test *)",
+      "Bash(npx playwright *)",
+      "Bash(npm run *)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(LOG_LEVEL=warn npm test -- --reporter=dot)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.qa)",
+      "Read(./.env.staging)",
+      "Read(./.env.prod)",
+      "Read(./.auth/**)",
+      "Edit(./.auth/**)",
+      "Edit(./reports/**)",
+      "Edit(./allure-results/**)",
+      "Edit(./test-results/**)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/format-on-edit.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
